@@ -14,7 +14,7 @@ SECTIONS {
     .text :
     {
         . = ALIGN(4);
-        startup.o(isr_vector)
+        KEEP(*(.isr_vector))
         _start_text = .;
         *(.text)
         *(.text*)

@@ -6,39 +6,51 @@ CC = $(TOOLCHAIN)-gcc
 AS = $(TOOLCHAIN)-as
 SIZE = $(TOOLCHAIN)-size
 DUMP = $(TOOLCHAIN)-objdump
-LFILE = src/linker.ld
+
+SRCDIR   = src
+OBJDIR   = obj
+BINDIR   = bin
+
+LFILE = $(SRCDIR)/linker.ld
 # Compile flags here
 CFLAGS   = -std=gnu11 -Wall -nostartfiles -fno-exceptions -mcpu=$(CORE) -static -g
+AFLAGS   = 
 LINKER   = $(CC) -o
 # linking flags here
-LFLAGS   = -Wall -T $(LFILE) -nostartfiles -fno-exceptions -mcpu=$(CORE) -static -lc
+LFLAGS   = -Wall -T $(LFILE) -nostartfiles -fno-exceptions -mcpu=$(CORE) -static -g -lc
 
 
 GDB = $(TOOLCHAIN)-gdb
 QEMU = qemu-system-arm
 QEMU_OPTS = -M vexpress-a9 -serial mon:stdio -kernel
 
-SRCDIR   = src
-OBJDIR   = obj
-BINDIR   = bin
-
-SOURCES  := $(wildcard $(SRCDIR)/*.c)
-INCLUDES := $(wildcard $(SRCDIR)/*.h)
-OBJECTS  := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
-rm       = rm -f
 
 
-$(BINDIR)/$(TARGET): $(OBJECTS)
-	@$(LINKER) $@ $(LFLAGS) $(OBJECTS)
+C_FILES := $(wildcard $(SRCDIR)/*.c)
+AS_FILES := $(wildcard $(SRCDIR)/*.S)
+OBJECTS_C := $(addprefix $(OBJDIR)/,$(notdir $(C_FILES:.c=.o)))
+OBJECTS_S := $(addprefix $(OBJDIR)/,$(notdir $(AS_FILES:.S=.o)))
+OBJECTS_ALL := $(OBJECTS_S) $(OBJECTS_C)
+rm = rm -f
+
+
+$(BINDIR)/$(TARGET): $(OBJECTS_ALL)
+	@mkdir -p $(@D)
+	@$(LINKER) $@ $(LFLAGS) $(OBJECTS_ALL)
 	@echo "Linking complete!"
 	@$(SIZE) $@
 
-$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
+$(OBJECTS_ALL) : | obj
+
+$(OBJDIR):
+	@mkdir -p $@
+
+$(OBJDIR)/%.o : $(SRCDIR)/%.c
 	@$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
 
 $(OBJDIR)/%.o : $(SRCDIR)/%.S
-	@$(AS) $(CFLAGS) -c $< -o $@
+	@$(AS) $(AFLAGS) $< -o $@
 	@echo "Assembled "$<" successfully!"
 
 qemu: 
@@ -52,7 +64,7 @@ dqemu: all
 
 .PHONY: clean
 clean:
-	@$(rm) $(OBJECTS)
+	@$(rm) $(OBJECTS_ALL)
 	@echo "Cleanup complete!"
 
 .PHONY: remove

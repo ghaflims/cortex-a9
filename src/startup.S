@@ -1,5 +1,5 @@
 .global _Reset
-.section isr_vector
+.section .isr_vector
 _Reset:
 	B reset_handler
 	B .
@@ -9,7 +9,7 @@ _Reset:
 	B .
 	B c_irq
 	B c_fiq
-
+.text
 reset_handler:
 	ldr r0, =0x60000000
 	mcr p15,0,r0,c12,c0,0

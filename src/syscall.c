@@ -13,6 +13,20 @@ extern const char _HEAP_MAX __attribute__((section(".heap")));
    Error cases:
     1. Allocation is not within heap range */
 
+void _exit(int r){
+  while(1);
+}
+
+extern int main(void);
+
+void _start(void){
+	main();
+	exit(0);
+}
+
+int _fini(int i){
+  return -1;
+}
 void * _sbrk (ptrdiff_t size)
 {
   /*

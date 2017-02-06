@@ -1,9 +1,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "font5x7.h"
 #include "ugui.h"
-
+#include "pl011.h"
 
 #define PL111_CR_EN		0x001
 #define PL111_CR_PWR		0x800
@@ -81,25 +80,6 @@ static volatile struct {
     } timers[2];
 } * const tregs = (void*)0x10011000;
 
-typedef volatile struct {
- uint32_t DR;
- uint32_t RSR_ECR;
- uint8_t reserved1[0x10];
- const uint32_t FR;
- uint8_t reserved2[0x4];
- uint32_t LPR;
- uint32_t IBRD;
- uint32_t FBRD;
- uint32_t LCR_H;
- uint32_t CR;
- uint32_t IFLS;
- uint32_t IMSC;
- const uint32_t RIS;
- const uint32_t MIS;
- uint32_t ICR;
- uint32_t DMACR;
-} pl011_t;
-
 typedef struct {
 	uint32_t cr;
 	uint32_t status;
@@ -107,17 +87,7 @@ typedef struct {
 	uint32_t ir;
 	
 } kmi_t;
-enum {
- RXFE = 0x10,
- TXFF = 0x20,
-};
- 
-pl011_t * const UART0 = (pl011_t *)0x10009000;
 
-static void uart_putc(char c){
-	while(UART0->FR & TXFF);
-	UART0->DR = c;
-}
 
 int _write(int f, char *ptr, int len){
 	int i;
@@ -149,55 +119,6 @@ void pdraw(UG_S16 x , UG_S16 y ,UG_COLOR c){
 	draw_pixel(x,y,c);
 }
 
-void draw_frect(uint32 x, uint32 y, uint32 l, uint32 w, uint16 c)
-{
-	int i, j;
-	for(i=0; i<l; i++)
-	{
-		for(j=0; j<w; j++)
-		{
-			draw_pixel(x+i, y+j, c);
-		}
-	}
-}
-void draw_char(uint32 x, uint32 y, uint32 color,char c){
-	int ii,jj;
-	char line;
-	for(ii=0;ii<6;ii++){
-		if(ii==5)
-			line = 0;
-		else
-			line = font[ii+(c*5)];
-		for(jj=0;jj<8;jj++){
-			if(line & 0x01){
-				draw_pixel(x+ii,y+jj,color);
-			}else{
-				draw_pixel(x+ii,y+jj,color>>16);
-			}
-			line>>=1;
-		}
-	}
-	
-}
-/*
-void draw_string(uint32 x, uint32 y, uint32 color,char* s){
-	if(x%6!=0 || y%8!=0 || strlen(s) > 168)
-		return;
-	int i=0;
-	int j=0;
-	int dy = 0;
-	while(*(s+i)){
-		if((i%200)==0 && i!=0){
-			y+=8;
-			x=0;
-			j=0;
-		}
-		draw_char(x+(j*6),y,color,*(s+i));
-		i++;
-		j++;
-	}
-}
-*/
 volatile uint8_t tsc; 
 void __attribute__ ((interrupt("SWI"))) c_svc(void){
 	printf("yaay SVC ticked\n");
@@ -215,8 +136,7 @@ void __attribute__ ((interrupt("IRQ"))) c_irq(void){
  		uart_putc(kbdus[tsc]);
  	}
 }
-void c_entry(void)
-{
+int main(void){
 	// set the priority and enable distributer and cpu pending
 	(*(volatile uint32_t*)(GIC_DISTRIBUTOR+ICDISER+4)) |=  (1<<12);
 	(*(volatile uint32_t*)(GIC_DISTRIBUTOR+ICDIPTR+0x34)) = 0xffffffff; // target process 0 for id 
@@ -240,18 +160,13 @@ void c_entry(void)
 	/* 16-bit color */
 	plio->control = 0x192b;
 	fb = (uint32*)0x60110000;
-	//memset(fb,0xff,800*600*sizeof(uint16));
+
 	for (x = 0; x < (800 * 600); ++x)
 		fb[x] = 0;
- 	draw_frect(100,200,40,40,0x001f);
- 	//draw_string(60, 80, 0x0000001f,"hello from the other side..!!");
- 	//uart_putc('M');
- 	//uart_putc('u');
  	printf("ptr address: %p\n",memptr);
  	kmi_t volatile *kmi_kb;
  	kmi_kb = (kmi_t*)(KMI_KB_BASE);
  	kmi_kb->cr = 0x14;
- 	uint8_t sc;
  	tregs->timers[1].Control = SP804_TIMER_ENABLE | SP804_TIMER_32BIT;
  	UG_Init (&gui ,pdraw, 800, 600);
  	UG_FillCircle(100, 100, 30, C_YELLOW);
@@ -266,5 +181,5 @@ void c_entry(void)
  	UG_PutString (200,200 ,"hello form the other side\nthis is a new line hehehehehhehehehehehehe") ;
  	asm volatile("SVC 0x05");
  	for(;;);
-	return;
+	return 0;
 }

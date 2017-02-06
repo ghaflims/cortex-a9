@@ -17,7 +17,7 @@ CFLAGS   = -std=gnu11 -Wall -nostartfiles -fno-exceptions -mcpu=$(CORE) -static 
 AFLAGS   = 
 LINKER   = $(CC) -o
 # linking flags here
-LFLAGS   = -Wall -T $(LFILE) -nostartfiles -fno-exceptions -mcpu=$(CORE) -static -g -lc
+LFLAGS   = -Wall -T $(LFILE) -nostartfiles -fno-exceptions --specs=nosys.specs -mcpu=$(CORE) -static -g -lc
 
 
 GDB = $(TOOLCHAIN)-gdb

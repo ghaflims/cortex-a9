@@ -30,7 +30,7 @@ reset_handler:
 	cps #010
 	ldr sp,=stackUSR
 
-	BL c_entry
+	BL _start
 	B .
 
 svc_handler:

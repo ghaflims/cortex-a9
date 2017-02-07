@@ -1,6 +1,8 @@
 #ifndef __PL011_H__
 #define __PL011_H__
 #include <stdint.h>
+
+#define UART0_BASE 0x10009000
 typedef volatile struct {
 	uint32_t DR;
 	uint32_t RSR_ECR;

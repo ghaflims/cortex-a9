@@ -1,6 +1,6 @@
 #include "pl011.h"
 
-pl011_t * const UART0 = (pl011_t *)0x10009000;
+volatile pl011_t* const UART0 = (pl011_t*)UART0_BASE;
 
 inline void uart_putc(char c){
 	while(UART0->FR & TXFF);

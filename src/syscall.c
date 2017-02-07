@@ -2,7 +2,7 @@
 #include <stddef.h> /* where ptrdiff_t is defined */
 #include <stdlib.h>
 #include <sys/stat.h>
-
+#include "pl011.h"
 /* Start of the heap.  */
 extern const char _HEAP_START __attribute__((section(".heap")));
 /* End of the heap (maximum value of heap_ptr).  */
@@ -15,6 +15,14 @@ extern const char _HEAP_MAX __attribute__((section(".heap")));
 
 void _exit(int r){
   while(1);
+}
+
+int _write(int f, char *ptr, int len){
+  int i;
+  for(i=0; i < len; i++){
+    uart_putc(*ptr++);
+  }
+  return len;
 }
 
 extern int main(void);

@@ -8,6 +8,7 @@ typedef struct {
 	uint32_t cr;
 	uint32_t status;
 	uint32_t data;
+	uint32_t clk
 	uint32_t ir;
 	
 } kmi_t;

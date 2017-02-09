@@ -27,4 +27,5 @@ void inline kb_handler(void){
 
 void inline kb_init(void){
 	kmi_kb->cr = 0x14;
+	kmi_kb->clk = 8;
 }

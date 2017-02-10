@@ -7,10 +7,10 @@
 #include "interrupt.h"
 
 int main(void){
+ 	interrupt_init();
 	clcd_init();
  	kb_init();
  	timer_init();
- 	interrupt_init();
  	UG_FillCircle(100, 100, 30, C_YELLOW);
  	UG_FillCircle(200, 100, 10, C_RED);
  	UG_FillCircle(250, 100, 10, C_BLUE);

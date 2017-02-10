@@ -1,6 +1,6 @@
 #include "pl011.h"
 #include "pl050.h"
-
+#include "interrupt.h"
 volatile kmi_t* const kmi_kb = (kmi_t*)(KMI_KB_BASE);
 
 char static kbdus[128] = {
@@ -27,5 +27,7 @@ void inline kb_handler(void){
 
 void inline kb_init(void){
 	kmi_kb->cr = 0x14;
-	kmi_kb->clk = 8;
+	kmi_kb->clk = 15;
+	install_isr(KMI0_INTR_IRQn, kb_handler);
+	enabler_irq(KMI0_INTR_IRQn);
 }

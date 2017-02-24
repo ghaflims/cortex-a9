@@ -29,5 +29,5 @@ void inline kb_init(void){
 	kmi_kb->cr = 0x14;
 	kmi_kb->clk = 15;
 	install_isr(KMI0_INTR_IRQn, kb_handler);
-	enabler_irq(KMI0_INTR_IRQn);
+	enable_irq(KMI0_INTR_IRQn);
 }

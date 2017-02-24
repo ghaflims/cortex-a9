@@ -6,5 +6,5 @@
 typedef void (*func_t)(void);
 void interrupt_init(void);
 void install_isr(IRQn_Type irq_num, func_t handler);
-void enabler_irq(IRQn_Type irq_num);
+void enable_irq(IRQn_Type irq_num);
 #endif

@@ -26,7 +26,7 @@ void __attribute__ ((interrupt("IRQ"))) c_irq(void){
 	asm volatile("cpsie i" : : : "memory", "cc");
 }
 
-void enabler_irq(IRQn_Type irq_num){
+void enable_irq(IRQn_Type irq_num){
 	GIC_EnableIRQ(irq_num);
 }
 void interrupt_init(void){

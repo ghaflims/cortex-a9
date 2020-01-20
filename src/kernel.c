@@ -3,6 +3,7 @@
 #include "pl011.h"
 #include "pl050.h"
 #include "pl111.h"
+#include "pl181.h"
 #include "sp804.h"
 #include "interrupt.h"
 
@@ -11,6 +12,7 @@ int main(void){
 	clcd_init();
  	kb_init();
  	timer_init();
+	sd_init();
  	UG_FillCircle(100, 100, 30, C_YELLOW);
  	UG_FillCircle(200, 100, 10, C_RED);
  	UG_FillCircle(250, 100, 10, C_BLUE);
@@ -22,6 +24,7 @@ int main(void){
 	UG_SetForecolor(C_YELLOW);
  	UG_PutString (200,200 ,"hello form the other side\nthis is a new line hehehehehhehehehehehehe") ;
  	asm volatile("SVC 0x05");
+	sd_test_read();
  	for(;;);
 	return 0;
 }

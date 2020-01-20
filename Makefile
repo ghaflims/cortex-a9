@@ -22,7 +22,7 @@ LFLAGS   = -Wall -T $(LFILE) -nostartfiles -fno-exceptions --specs=nosys.specs -
 
 GDB = $(TOOLCHAIN)-gdb
 QEMU = qemu-system-arm
-QEMU_OPTS = -M vexpress-a9 -serial mon:stdio -kernel
+QEMU_OPTS = -M vexpress-a9 -sd bin/sd.img -serial mon:stdio -audiodev id=none,driver=none -kernel
 
 
 
@@ -59,7 +59,7 @@ qemu:
 gdb: 
 	$(GDB) $(BINDIR)/$(TARGET)
 
-dqemu: all
+dqemu: 
 	$(QEMU) -s -S $(QEMU_OPTS) $(BINDIR)/$(TARGET)
 
 .PHONY: clean

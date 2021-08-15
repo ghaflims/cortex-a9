@@ -17,12 +17,12 @@ CFLAGS   = -std=gnu11 -Wall -nostartfiles -fno-exceptions -mcpu=$(CORE) -static 
 AFLAGS   = 
 LINKER   = $(CC) -o
 # linking flags here
-LFLAGS   = -Wall -T $(LFILE) -nostartfiles -fno-exceptions --specs=nosys.specs -mcpu=$(CORE) -static -g -lc
+LFLAGS   = -Wall -T $(LFILE) -nostartfiles -fno-exceptions --specs=nosys.specs -mcpu=$(CORE) -static -g -lc -Wl,--print-map > bin/mapfile.map
 
 
 GDB = $(TOOLCHAIN)-gdb
 QEMU = qemu-system-arm
-QEMU_OPTS = -M vexpress-a9 -sd bin/sd.img -serial mon:stdio -audiodev id=none,driver=none -kernel
+QEMU_OPTS = -M vexpress-a9 -drive file=bin/sd.img,format=raw,if=sd -serial mon:stdio -audiodev id=none,driver=none -kernel
 
 
 

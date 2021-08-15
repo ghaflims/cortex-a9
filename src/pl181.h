@@ -32,6 +32,8 @@
 #define DCRCFAIL (1<<1)
 #define DTIMEOUT (1<<3)
 #define RXOVERR (1<<5)
+#define RXFULL (1<<17)
+#define TXEMPTY (1<<18)
 
 typedef volatile struct {
 	uint32_t MCIPower;
@@ -58,8 +60,8 @@ typedef volatile struct {
 } pl181_t;
 
 void sd_init();
-void sd_handler();
 void sd_send_cmd(int cmd, int arg, int resp);
 void sd_test_read();
+void sd_read(void* buff,uint32_t sector,uint32_t count);
 #endif
 

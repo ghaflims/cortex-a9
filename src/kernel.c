@@ -9,10 +9,11 @@
 
 int main(void){
  	interrupt_init();
+	sd_init();
+	sd_test_read();
 	clcd_init();
  	kb_init();
  	timer_init();
-	sd_init();
  	UG_FillCircle(100, 100, 30, C_YELLOW);
  	UG_FillCircle(200, 100, 10, C_RED);
  	UG_FillCircle(250, 100, 10, C_BLUE);
@@ -23,8 +24,10 @@ int main(void){
  	UG_SetBackcolor(C_BLACK);
 	UG_SetForecolor(C_YELLOW);
  	UG_PutString (200,200 ,"hello form the other side\nthis is a new line hehehehehhehehehehehehe") ;
- 	asm volatile("SVC 0x05");
-	sd_test_read();
+ 	//asm volatile("SVC 0x05");
+	
+	printf("Done reading SD CARD\n");
+	//UG_PutString (50,50 ,"SD READ DONE");
  	for(;;);
 	return 0;
 }

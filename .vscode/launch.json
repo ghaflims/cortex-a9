@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "debug qemu",
+            "executable": "${workspaceRoot}/bin/kernel.elf",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/kernel.elf",
+            "miDebuggerServerAddress": "localhost:1234",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": false,
+            "launchCompleteCommand": "exec-run",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/home/mustafa/opt/gcc-arm-none-eabi-9-2019-q4-major/bin/arm-none-eabi-gdb",
+            "setupCommands": [
+                {
+                  "description": "Enable pretty-printing for gdb",
+                  "text": "-enable-pretty-printing",
+                  "ignoreFailures": true
+                }
+              ],
+              "preLaunchTask": "Make"
+        }
+    ]
+}

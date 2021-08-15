@@ -23,7 +23,10 @@ void __attribute__ ((interrupt("IRQ"))) c_irq(void){
 	}
 	
 	GIC_EndInterrupt(irq_num);
-	asm volatile("cpsie i" : : : "memory", "cc");
+	// the below was commented to fix a bug in nested IRQ..
+	// the interrupt will be automaticly enabled once the CPRS is restored from IRQ_SPRS once the interrupt returns..
+	// This will ensure the the CPU enters the USR mode prior to the next exception..
+	//asm volatile("cpsie i" : : : "memory", "cc");
 }
 
 void enable_irq(IRQn_Type irq_num){

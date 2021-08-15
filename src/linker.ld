@@ -7,7 +7,7 @@ MEMORY
 
 }
 
-heap_size = 0x1000; /* 4K */
+heap_size = 64K; /* 10M */
 
 SECTIONS {
     /*. = ORIGIN(RAM) + 0x10000;*/
@@ -118,27 +118,27 @@ SECTIONS {
 
     .stack : {
     statckSTART = .;
-    . = . + 0x0001000;
+    . = . + 64K;
     . = ALIGN(4);
     stackSVC = .;
     
-    . = . + 0x00001000;
+    . = . + 64K;
     . = ALIGN(4);
     stackUND = .;
     
-    . = . + 0x00001000;
+    . = . + 64K;
     . = ALIGN(4);
     stackABT = .;
     
-    . = . + 0x00001000;
+    . = . + 64K;
     . = ALIGN(4);
     stackIRQ = .;
     
-    . = . + 0x00001000;
+    . = . + 64K;
     . = ALIGN(4);
     stackFIQ = .;   
     
-    . = . + 0x00001000;
+    . = . + 64K;
     . = ALIGN(4);
     stackUSR = .;
     

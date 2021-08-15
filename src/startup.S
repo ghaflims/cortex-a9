@@ -26,9 +26,11 @@ reset_handler:
 
 	cps #0x11
 	ldr sp,=stackFIQ
-
-	cps #010
+	cpsie i
+// fixed a bug it was #010 but the correct is #0x10
+	cps #0x10
 	ldr sp,=stackUSR
+
 
 	BL _start
 	B .

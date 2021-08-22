@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://github.com/tinyclub/qemu-arm-vexpress-a9/blob/master/kernel/v5.1/vexpress-v2p-ca9.dtb
+HostUrl=https://raw.githubusercontent.com/tinyclub/qemu-arm-vexpress-a9/master/kernel/v5.1/vexpress-v2p-ca9.dtb

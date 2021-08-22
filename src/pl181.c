@@ -57,7 +57,6 @@ void sd_handler(){
 		}
 	}
 	MCI->MCIClear = 0xffffffff;
-	MCI->MCIMask0 = RXFULL|TXEMPTY;
 }
 
 void sd_init(){
@@ -73,7 +72,7 @@ void sd_init(){
 	sd_send_cmd(3, RCA, MMC_RSP_R1); // assign RCA
 	sd_send_cmd(7, RCA, MMC_RSP_R1); // transfer state: must use RCA
 	sd_send_cmd(16, FBLK_SIZE, MMC_RSP_R1); // set data block length
-	MCI->MCIMask0 = RXFULL|TXEMPTY; // mask used to set what events will trigger intrrupt
+	MCI->MCIMask0 = RXFULL; // mask used to set what events will trigger intrrupt
 	install_isr(MCI_INTR0_IRQn, sd_handler);
 	enable_irq(MCI_INTR0_IRQn);
 	printf("--finished sd init\n");
@@ -98,13 +97,17 @@ void sd_write(void* buff,uint32_t sector,uint32_t count){
 	MCI->MCIDataTimer = 0xffff0000;
 	MCI->MCIDataLength = FBLK_SIZE*count;
 	MCI->MCIDataCtrl = 0x91;
-	sd_send_cmd(23,count,MMC_RSP_R1);
 	sd_send_cmd(25,sector*FBLK_SIZE,MMC_RSP_R1); // write multi blks
-	while(txdone==0);
+	while(txdone==0){
+		uint32_t s = MCI->MCIStatus;
+		s = s & TXEMPTY;
+		//MCI->MCIClear = 0xffffffff;
+	}
 	printf("Done writing %ld to sector: %ld ..\n",FBLK_SIZE * count, sector);
 }
 */
 
+// TODO: need a re-write and need to get the interrupt working
 void sd_write(void* buff,uint32_t sector,uint32_t count){
 	txbuf = buff;
 	uint32_t *ptr = buff;
@@ -114,9 +117,7 @@ void sd_write(void* buff,uint32_t sector,uint32_t count){
 	MCI->MCIDataTimer = 0xffff0000;
 	MCI->MCIDataLength = FBLK_SIZE*count;
 	MCI->MCIDataCtrl = 0x91;
-	//sd_send_cmd(23,count,MMC_RSP_R1);
-	sd_send_cmd(23,count,MMC_RSP_R1); // write multi blks
-	sd_send_cmd(25,count,MMC_RSP_R1);
+	sd_send_cmd(25,sector*FBLK_SIZE,MMC_RSP_R1);
 	uint32_t status = MCI->MCIStatus;
 	while(status & TXEMPTY && txcount){
 		for(i=0;i<16;i++){
@@ -126,18 +127,20 @@ void sd_write(void* buff,uint32_t sector,uint32_t count){
 		printf("\n");
 		txcount-=64;
 		txbuf+=64;
+		ptr+=16;//forgot to advance the ptr to write the next 64 block
 		status = MCI->MCIStatus;
 	}
 	//while(txdone==0);
-	//sd_send_cmd(12,0,MMC_RSP_R1);
+	sd_send_cmd(12,0,MMC_RSP_R1);
 	printf("Done writing %ld bytes to sector: %ld ..\n",FBLK_SIZE * count, sector);
 }
+
 
 void sd_test_read(){
 	int i = 0;
 	sd_read_buf = malloc(1024);
 	printf("malloc:%p\n",sd_read_buf);
-	//sd_read(sd_read_buf,0,2);
+	sd_read(sd_read_buf,0,2);
 
 	char* ch = (char*)sd_read_buf;
 	for(i=0;i<23;i++){
@@ -146,7 +149,7 @@ void sd_test_read(){
 	printf("\n%lx\n",sd_read_buf[0]);
 	printf("%lx\n",sd_read_buf[128]);
 	for(i=0;i<512;i++){
-		((char *)sd_read_buf)[i] = 'A';
+		((char *)sd_read_buf)[i] = 'B';
 	}
 	sd_write(sd_read_buf,1,1);
 }

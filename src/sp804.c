@@ -1,10 +1,15 @@
 #include "sp804.h"
+#include "pl031.h"
+#include <time.h>
 #include "interrupt.h"
 #include <stdio.h>
 volatile timer804_t* const tregs = (timer804_t*)TIMER_BASE;
 volatile uint32_t counter;
 void timer_handler(void){
-	printf("counter is: %lu\n",counter++);
+	time_t ts=read_rtc();
+	struct tm* timeinfo;
+	timeinfo = localtime(&ts);
+	printf("counter is: %lu, TIME: %s\n",counter++,asctime(timeinfo));
 	tregs->timers[0].IntClr = 0;
 }
 void timer_init(void){

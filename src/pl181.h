@@ -63,5 +63,6 @@ void sd_init();
 void sd_send_cmd(int cmd, int arg, int resp);
 void sd_test_read();
 void sd_read(void* buff,uint32_t sector,uint32_t count);
+void sd_write(void* buff,uint32_t sector,uint32_t count);
 #endif
 

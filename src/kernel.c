@@ -6,11 +6,35 @@
 #include "pl181.h"
 #include "sp804.h"
 #include "interrupt.h"
-
+#include "ff.h"
 int main(void){
  	interrupt_init();
-	sd_init();
-	sd_test_read();
+	//sd_init();
+	
+	FATFS fs0;
+	FIL fil;
+	FRESULT fr;
+	char line[100];
+	char out[100];
+	unsigned int wc;
+	for(int i=0;i<100;i++)
+		out[i]='A';
+	for(int i=64;i<100;i++)
+		out[i]='B';
+	f_mount(&fs0,"",0);
+	fr = f_open(&fil,"test.txt",FA_READ);
+
+	f_read(&fil,line,100,&wc);
+	printf("%s",line);
+	f_close(&fil);
+	fr = f_open(&fil,"test2.txt",FA_WRITE|FA_CREATE_ALWAYS);
+	f_write(&fil,out,100,&wc);
+	f_close(&fil);
+	f_unmount("");
+	printf("# of bytes written: %d",wc);
+	//sd_test_read();
+	
+	
 	clcd_init();
  	kb_init();
  	timer_init();

@@ -11,8 +11,10 @@ volatile void *rxbuf,*txbuf;
 static volatile int rxcount,txcount,rxdone,txdone;
 
 void sd_send_cmd(int cmd, int arg, int resp){
+	//printf("SD CMD [cmd]:%d,[arg]:%d,[resp]:%d\n",cmd,arg,resp);
 	MCI->MCIArgument = arg;
 	MCI->MMCCommand = (1<<10) | (resp<<6) | cmd;
+
 }
 
 void sd_handler(){
@@ -22,6 +24,7 @@ void sd_handler(){
 	status = MCI->MCIStatus;
 	
 	if(status & RXFULL){
+		//printf("I'm in RX rxcount: %d..\n",rxcount);
 		ptr = (uint32_t*)rxbuf;
 		err = status & (DCRCFAIL | DTIMEOUT | RXOVERR);
 		if(!err && rxcount){
@@ -35,21 +38,20 @@ void sd_handler(){
 		if(rxcount==0){
 			sd_send_cmd(12,0,MMC_RSP_R1); //CMD12 will stop the transmission
 			rxdone=1;
-			printf("done reading..\n");
+			//printf("done reading..\n");
 		}
 	}else if(status & TXEMPTY){
-		printf("I'm in TX txcount: %d..\n",txcount);
+		//printf("I'm in TX txcount: %d..\n",txcount);
 		ptr = (uint32_t*)txbuf;
 		err = status & (DCRCFAIL | DTIMEOUT);
 		if(!err && txcount){
 			for(i=0;i<16;i++){
-				MCI->MCIFIFO[0] = *(ptr+i);	
+				MCI->MCIFIFO[0] = ptr[i];	
 			}
 			txcount-=64;
 			txbuf+=64; 
 			status = MCI->MCIStatus;
-			printf("%x\n",status&TXEMPTY);
-			printf("%d\n",txcount);
+			//printf("remaining bytes to tx sd:%d\n",txcount);
 		}
 		if(txcount==0){
 			sd_send_cmd(12,0,MMC_RSP_R1); //CMD12 will stop the transmission
@@ -57,7 +59,6 @@ void sd_handler(){
 		}
 	}
 	MCI->MCIClear = 0xffffffff;
-	MCI->MCIMask0 = RXFULL|TXEMPTY;
 }
 
 void sd_init(){
@@ -85,26 +86,27 @@ void sd_read(void* buff,uint32_t sector,uint32_t count){
 	rxdone = 0;
 	MCI->MCIDataTimer = 0xffff0000;
 	MCI->MCIDataLength = FBLK_SIZE*count;
-	MCI->MCIDataCtrl = 0x93;
 	sd_send_cmd(18,sector*FBLK_SIZE,MMC_RSP_R1); // read multi blks
+	MCI->MCIDataCtrl = 0x93;
 	while(rxdone==0);
-	printf("Done reading %ld from sector: %ld ..\n",FBLK_SIZE * count, sector);
+	//printf("Done reading %ld from sector: %ld ..\n",FBLK_SIZE * count, sector);
 }
-/*
+
+
 void sd_write(void* buff,uint32_t sector,uint32_t count){
 	txbuf = buff;
 	txcount = FBLK_SIZE * count;
 	txdone = 0;
 	MCI->MCIDataTimer = 0xffff0000;
 	MCI->MCIDataLength = FBLK_SIZE*count;
-	MCI->MCIDataCtrl = 0x91;
-	sd_send_cmd(23,count,MMC_RSP_R1);
 	sd_send_cmd(25,sector*FBLK_SIZE,MMC_RSP_R1); // write multi blks
+	MCI->MCIDataCtrl = 0x91;
 	while(txdone==0);
-	printf("Done writing %ld to sector: %ld ..\n",FBLK_SIZE * count, sector);
+	//printf("Done writing %ld to sector: %ld ..\n",FBLK_SIZE * count, sector);
 }
-*/
 
+
+/*
 void sd_write(void* buff,uint32_t sector,uint32_t count){
 	txbuf = buff;
 	uint32_t *ptr = buff;
@@ -115,8 +117,8 @@ void sd_write(void* buff,uint32_t sector,uint32_t count){
 	MCI->MCIDataLength = FBLK_SIZE*count;
 	MCI->MCIDataCtrl = 0x91;
 	//sd_send_cmd(23,count,MMC_RSP_R1);
-	sd_send_cmd(23,count,MMC_RSP_R1); // write multi blks
-	sd_send_cmd(25,count,MMC_RSP_R1);
+	//sd_send_cmd(23,count,MMC_RSP_R1); // write multi blks
+	sd_send_cmd(25,sector*FBLK_SIZE,MMC_RSP_R1);
 	uint32_t status = MCI->MCIStatus;
 	while(status & TXEMPTY && txcount){
 		for(i=0;i<16;i++){
@@ -129,24 +131,21 @@ void sd_write(void* buff,uint32_t sector,uint32_t count){
 		status = MCI->MCIStatus;
 	}
 	//while(txdone==0);
-	//sd_send_cmd(12,0,MMC_RSP_R1);
+	sd_send_cmd(12,0,MMC_RSP_R1);
 	printf("Done writing %ld bytes to sector: %ld ..\n",FBLK_SIZE * count, sector);
 }
-
+*/
 void sd_test_read(){
 	int i = 0;
 	sd_read_buf = malloc(1024);
-	printf("malloc:%p\n",sd_read_buf);
-	//sd_read(sd_read_buf,0,2);
-
+	sd_read(sd_read_buf,0,2);
 	char* ch = (char*)sd_read_buf;
 	for(i=0;i<23;i++){
 		printf("%c",*(ch+i));
 	}
-	printf("\n%lx\n",sd_read_buf[0]);
-	printf("%lx\n",sd_read_buf[128]);
+
 	for(i=0;i<512;i++){
-		((char *)sd_read_buf)[i] = 'A';
+		((char *)sd_read_buf)[i] = 'O';
 	}
 	sd_write(sd_read_buf,1,1);
 }

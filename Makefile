@@ -20,9 +20,9 @@ LINKER   = $(CC) -o
 LFLAGS   = -Wall -T $(LFILE) -nostartfiles -fno-exceptions --specs=nosys.specs -mcpu=$(CORE) -static -g -lc -Wl,--print-map > bin/mapfile.map
 
 
-GDB = $(TOOLCHAIN)-gdb
+GDB = gdb-multiarch
 QEMU = qemu-system-arm
-QEMU_OPTS = -M vexpress-a9 -drive file=bin/sd.img,format=raw,if=sd -serial mon:stdio -audiodev id=none,driver=none -kernel
+QEMU_OPTS = -M vexpress-a9 -drive file=bin/sd.img,format=raw,if=sd -serial mon:stdio -kernel
 
 
 

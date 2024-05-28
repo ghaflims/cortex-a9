@@ -210,17 +210,8 @@ void GIC_DistInit(void)
     GIC_SetPriority((IRQn_Type)0, 0xff);
     priority_field = GIC_GetPriority((IRQn_Type)0);
 
-    for (i = 32; i < num_irq; i++)
-    {
-        //Disable all SPI the interrupts
-        GIC_DisableIRQ((IRQn_Type)i);
-        //Set level-sensitive and N-N model
-        //GIC_SetLevelModel(i, 0, 0);
-        //Set priority
-        GIC_SetPriority((IRQn_Type)i, priority_field/2);
-        //Set target list to "all cpus"
-        GIC_SetTarget((IRQn_Type)i, 0xff);
-    }
+
+
     /* Set level-edge and 1-N model */
     /* GICDistributor->ICDICFR[ 0] is read only */
     GICDistributor->ICDICFR[ 1] = 0x00000055;
@@ -257,6 +248,22 @@ void GIC_DistInit(void)
     GICDistributor->ICDICFR[32] = 0x55555555;
     GICDistributor->ICDICFR[33] = 0x55555555;
 
+
+    // there was a bug where the pl181 irq line is still asserted but the sd interrupt handler did re-enter..
+    // This fixes the issue, further reading in ARM GIC documentation is needed and the gic code should be re-written by me to avoid assumption..
+    // but for now I'm happy that this works..
+    for (i = 32; i < num_irq; i++)
+    {
+        //Disable all SPI the interrupts
+        GIC_DisableIRQ((IRQn_Type)i);
+        //Set level-sensitive and N-N model
+        GIC_SetLevelModel(i, 0, 0);
+        //Set priority
+        GIC_SetPriority((IRQn_Type)i, priority_field/2);
+        //Set target list to "all cpus"
+        GIC_SetTarget((IRQn_Type)i, 0xff);
+    }
+    
     //Enable distributor
     GIC_EnableDistributor();
 }

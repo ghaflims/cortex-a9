@@ -74,7 +74,7 @@ void sd_init(){
 	sd_send_cmd(3, RCA, MMC_RSP_R1); // assign RCA
 	sd_send_cmd(7, RCA, MMC_RSP_R1); // transfer state: must use RCA
 	sd_send_cmd(16, FBLK_SIZE, MMC_RSP_R1); // set data block length
-	MCI->MCIMask0 = RXFULL|TXEMPTY; // mask used to set what events will trigger intrrupt
+	MCI->MCIMask0 = RXFULL | TXEMPTY; // mask used to set what events will trigger intrrupt
 	install_isr(MCI_INTR0_IRQn, sd_handler);
 	enable_irq(MCI_INTR0_IRQn);
 	printf("--finished sd init\n");
@@ -128,6 +128,7 @@ void sd_write(void* buff,uint32_t sector,uint32_t count){
 		printf("\n");
 		txcount-=64;
 		txbuf+=64;
+		ptr+=16;//forgot to advance the ptr to write the next 64 block
 		status = MCI->MCIStatus;
 	}
 	//while(txdone==0);

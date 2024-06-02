@@ -5,68 +5,7 @@
 #include <stdio.h>
 
 volatile pl041_t* const AACI = (pl041_t*)AACI_BASE;
-// pl0141 init
-/*	
-	(*AACIRXCR) = 0;
-	(*AACITXCR) = 0;
-	(*AACIIE) = 0;
-	(*AACIMAINCR) = (1<<6)|(1<<5)|(1<<4)|(1<<3)|(1<<0);
-	(*AACIRESET) = 0;
-	pl041_delay(2);
-	(*AACIRESET) = 1;
 
-	// ac97 reset
-		// select ac97 codec [check here if it doesn't work]
-	(*AACIMAINCR) = (1<<6)|(1<<5)|(1<<4)|(1<<3)|(1<<0);
-		// ac97 write
-	(*AACISL2TX) = 0xffff << 4;
-	(*AACISL1TX) = AC97_RESET << 12;
-	pl041_delay(50); // frame period in us
-	pl041_delay(50*8); // wait for timeout [check here if it doesn't work]
-
-	// pl041 channel config [don't enable just yet]
-	(*AACITXCR) = (1<<16) | (1<<3);
-		// ac97 set volume to max 0x3f [check here if it doesn't work set others]
-	(*AACIMAINCR) = (1<<6)|(1<<5)|(1<<4)|(1<<3)|(1<<0);
-	(*AACISL2TX) = (0x3f|(0x3f<<8)) << 4;
-	(*AACISL1TX) = AC97_MASTER << 12;
-	pl041_delay(50); // frame period in us
-	pl041_delay(50*8); // wait for timeout [check here if it doesn't work]
-
-	(*AACISL2TX) = (0x3f|(0x3f<<8)) << 4;
-	(*AACISL1TX) = AC97_HEADPHONE << 12;
-	pl041_delay(50); // frame period in us
-	pl041_delay(50*8); // wait for timeout [check here if it doesn't work]
-
-	(*AACISL2TX) = (0x3f|(0x3f<<8)) << 4;
-	(*AACISL1TX) = AC97_MASTER_MONO << 12;
-	pl041_delay(50); // frame period in us
-	pl041_delay(50*8); // wait for timeout [check here if it doesn't work]
-
-	(*AACISL2TX) = (0x3f|(0x3f<<8)) << 4;
-	(*AACISL1TX) = AC97_PCM << 12;
-	pl041_delay(50); // frame period in us
-	pl041_delay(50*8); // wait for timeout [check here if it doesn't work]
-
-
-		// ac97 set rate
-	(*AACIMAINCR) = (1<<6)|(1<<5)|(1<<4)|(1<<3)|(1<<0);
-	(*AACISL2TX) = 44100 << 4;
-	(*AACISL1TX) = AC97_PCM_FRONT_DAC_RATE << 12;
-	pl041_delay(50); // frame period in us
-	pl041_delay(50*8); // wait for timeout [check here if it doesn't work]
-
-	// pl041 channel enable
-	(*AACITXCR) = (1<<16) | (1<<3) | (1<<0);
-
-	// send data
-	for(int j=0;j<60;j++){
-		for(int i=0;i<44100;i++){
-			int16_t s = audioSamples[i];
-			(*AACIDR1) = (s<<16)|s;
-		}
-	}
-*/
 void aaci_delay(uint32_t us){
     for(int i=0;i<us*2;i++){
         asm("nop");
@@ -148,13 +87,11 @@ void aaci_test_sound(){
 }
 
 void aaci_test_wavfile(){
-	//FATFS fs0;
 	FIL f;
 	FRESULT fr;
 	const size_t wav_fsize = 589818;
 	uint16_t* wavdata = malloc(wav_fsize);
 	unsigned int wc;
-	//f_mount(&fs0,"",0);
 	fr = f_open(&f,"pcm.bin",FA_READ);
 	if(!fr){
 		f_read(&f,wavdata,wav_fsize,&wc);
@@ -167,5 +104,4 @@ void aaci_test_wavfile(){
 		printf("error in reading pcm.bin file\n");
 	}
 	f_close(&f);
-	//f_unmount("");
 }

@@ -86,18 +86,6 @@ typedef volatile struct {
     const uint32_t AACIPCELLID3;
 } pl041_t;
 
-
-// pl0141 init
-	// ac97 reset
-	// pl041 channel config
-	// ? reigister isr ?
-	// --Starting Sound
-	// pl041 channel enable
-	// pl041 irq enable
-	// --Sound Transmit
-	// pl041 channel write
-	//play with audio 
-
 void aaci_init();
 void aaci_config_channel();
 void aaci_enable_channel();
@@ -110,7 +98,6 @@ void ac97_write(uint16_t reg, uint16_t val);
 void ac97_select();
 void ac97_set_volume();
 void ac97_set_rate(uint16_t rate);
-
 
 void aaci_test_sound();
 void aaci_test_wavfile();

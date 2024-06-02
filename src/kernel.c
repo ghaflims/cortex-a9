@@ -5,12 +5,14 @@
 #include "pl111.h"
 #include "pl181.h"
 #include "sp804.h"
+#include "pl041.h"
 #include "interrupt.h"
 #include "ff.h"
+
+
 int main(void){
  	interrupt_init();
 	//sd_init();
-	
 	FATFS fs0;
 	FIL fil;
 	FRESULT fr;
@@ -21,22 +23,19 @@ int main(void){
 		out[i]='A';
 	for(int i=64;i<100;i++)
 		out[i]='M';
+	//mount sd card as FAT FS 
 	f_mount(&fs0,"",0);
 	fr = f_open(&fil,"test.txt",FA_READ);
-
 	f_read(&fil,line,100,&wc);
 	printf("%s",line);
 	f_close(&fil);
 	fr = f_open(&fil,"test2.txt",FA_WRITE|FA_CREATE_ALWAYS);
 	f_write(&fil,out,100,&wc);
 	f_close(&fil);
-	f_unmount("");
 	printf("# of bytes written: %d\n",wc);
-	//sd_test_read();
-	
-	
 	clcd_init();
  	kb_init();
+	aaci_init();
  	timer_init();
  	UG_FillCircle(100, 100, 30, C_YELLOW);
  	UG_FillCircle(200, 100, 10, C_RED);
@@ -49,9 +48,12 @@ int main(void){
 	UG_SetForecolor(C_YELLOW);
  	UG_PutString (200,200 ,"hello form the other side\nthis is a new line hehehehehhehehehehehehe") ;
  	asm volatile("SVC 0x05");
-	
+	aaci_test_sound();
+	aaci_test_wavfile();
 	//printf("Done reading SD CARD\n");
 	//UG_PutString (50,50 ,"SD READ DONE");
+	//unmount FAT FS
+	f_unmount("");
  	for(;;);
 	return 0;
 }

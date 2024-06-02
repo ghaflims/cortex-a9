@@ -7,7 +7,7 @@ MEMORY
 
 }
 
-heap_size = 64K; /* 10M */
+heap_size = 10M; /* 10M */
 
 SECTIONS {
     /*. = ORIGIN(RAM) + 0x10000;*/
